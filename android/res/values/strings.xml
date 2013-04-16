@@ -7,5 +7,6 @@
     <string name="send">Send</string>
     <string name="sendMessage">sendMessage</string>
     <string name="emptystring"></string>
+    <string name="title_activity_geekwatch">GeekwatchActivity</string>
 
 </resources>

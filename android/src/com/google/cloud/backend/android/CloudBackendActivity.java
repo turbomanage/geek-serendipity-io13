@@ -20,6 +20,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.support.v4.app.FragmentActivity;
 
 import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential;
 
@@ -32,7 +33,7 @@ import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccoun
  *
  * @author kazsato
  */
-public class CloudBackendActivity extends Activity {
+public class CloudBackendActivity extends FragmentActivity {
 
   private static final int REQUEST_ACCOUNT_PICKER = 2;
 
