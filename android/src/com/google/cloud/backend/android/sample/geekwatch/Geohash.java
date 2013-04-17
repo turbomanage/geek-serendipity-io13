@@ -10,7 +10,7 @@ public class Geohash {
         final static char[] digits = { '0', '1', '2', '3', '4', '5', '6', '7', '8',
                         '9', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'j', 'k', 'm', 'n', 'p',
                         'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z' };
-        
+
         final static HashMap<Character, Integer> lookup = new HashMap<Character, Integer>();
         static {
                 int i = 0;
@@ -18,18 +18,16 @@ public class Geohash {
                         lookup.put(c, i++);
         }
 
-        /*
         public static void main(String[] args) {
                 double[] latlon = new Geohash().decode("dj248j248j24");
                 System.out.println(latlon[0] + " " + latlon[1]);
-                
+
                 Geohash e = new Geohash();
-                String s = e.encode(30, -90.0);
+                String s = e.encode(33.786846, -84.382444);
                 System.out.println(s);
                 latlon = e.decode(s);
                 System.out.println(latlon[0] + ", " + latlon[1]);
         }
-        */
 
         public double[] decode(String geohash) {
                 StringBuilder buffer = new StringBuilder();
@@ -38,10 +36,10 @@ public class Geohash {
                         int i = lookup.get(c) + 32;
                         buffer.append( Integer.toString(i, 2).substring(1) );
                 }
-                
+
                 BitSet lonset = new BitSet();
                 BitSet latset = new BitSet();
-                
+
                 //even bits
                 int j =0;
                 for (int i=0; i< numbits*2;i+=2) {
@@ -50,7 +48,7 @@ public class Geohash {
                           isSet = buffer.charAt(i) == '1';
                         lonset.set(j++, isSet);
                 }
-                
+
                 //odd bits
                 j=0;
                 for (int i=1; i< numbits*2;i+=2) {
@@ -59,13 +57,13 @@ public class Geohash {
                           isSet = buffer.charAt(i) == '1';
                         latset.set(j++, isSet);
                 }
-                
+
                 double lon = decode(lonset, -180, 180);
                 double lat = decode(latset, -90, 90);
-                
-                return new double[] {lat, lon};         
+
+                return new double[] {lat, lon};
         }
-        
+
         private double decode(BitSet bs, double floor, double ceiling) {
                 double mid = 0;
                 for (int i=0; i<bs.length(); i++) {
@@ -77,8 +75,8 @@ public class Geohash {
                 }
                 return mid;
         }
-        
-        
+
+
         public String encode(double lat, double lon) {
                 BitSet latbits = getBits(lat, -90, 90);
                 BitSet lonbits = getBits(lon, -180, 180);
