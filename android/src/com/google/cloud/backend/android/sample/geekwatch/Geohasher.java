@@ -4,7 +4,7 @@ package com.google.cloud.backend.android.sample.geekwatch;
 import java.util.BitSet;
 import java.util.HashMap;
 
-public class Geohash {
+public class Geohasher {
 
         private static int numbits = 6 * 5;
         final static char[] digits = { '0', '1', '2', '3', '4', '5', '6', '7', '8',
@@ -19,10 +19,10 @@ public class Geohash {
         }
 
         public static void main(String[] args) {
-                double[] latlon = new Geohash().decode("dj248j248j24");
+                double[] latlon = new Geohasher().decode("dj248j248j24");
                 System.out.println(latlon[0] + " " + latlon[1]);
 
-                Geohash e = new Geohash();
+                Geohasher e = new Geohasher();
                 String s = e.encode(33.786846, -84.382444);
                 System.out.println(s);
                 latlon = e.decode(s);
