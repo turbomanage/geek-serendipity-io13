@@ -1,5 +1,11 @@
 package com.google.cloud.backend.android.sample.geekwatch;
 
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+
+import com.google.cloud.backend.android.CloudEntity;
+
 /**
  * Model object describing a geek user of this app
  *
@@ -7,33 +13,61 @@ package com.google.cloud.backend.android.sample.geekwatch;
  */
 public class Geek {
 
-	private String name = "No Name";
-	private String interest = "I/O 13";
-	private String geohash;
+	private CloudEntity cloudEntity;
+
+	public static final String KEY_NAME = "name";
+	public static final String KEY_INTEREST = "interest";
+	public static final String KEY_GEOHASH = "location";
 
 	public Geek(String name, String interest, String geohash) {
-		this.name = name;
-		this.interest = interest;
-		this.geohash = geohash;
+		this.cloudEntity = new CloudEntity("Geek");
+		this.setName(name);
+		this.setInterest(interest);
+		this.setGeohash(geohash);
+	}
+
+	public Geek(CloudEntity e) {
+		this.cloudEntity = e;
+	}
+
+	public CloudEntity asEntity() {
+		return this.cloudEntity;
+	}
+
+	public static List<Geek> fromEntities(List<CloudEntity> entities) {
+		List<Geek> geeks = new ArrayList<Geek>();
+		for (CloudEntity cloudEntity : entities) {
+			geeks.add(new Geek(cloudEntity));
+		}
+		return geeks;
 	}
 
 	public String getName() {
-		return name;
+		return (String) cloudEntity.get(KEY_NAME);
 	}
+
 	public void setName(String name) {
-		this.name = name;
+		cloudEntity.put(KEY_NAME, name);
 	}
+
 	public String getInterest() {
-		return interest;
+		return (String) cloudEntity.get(KEY_INTEREST);
 	}
+
 	public void setInterest(String interest) {
-		this.interest = interest;
+		cloudEntity.put(KEY_INTEREST, interest);
 	}
+
 	public String getGeohash() {
-		return geohash;
+		return (String) cloudEntity.get(KEY_GEOHASH);
 	}
+
 	public void setGeohash(String geohash) {
-		this.geohash = geohash;
+		cloudEntity.put(KEY_GEOHASH, geohash);
+	}
+
+	public Date getUpdatedAt() {
+		return cloudEntity.getUpdatedAt();
 	}
 
 }

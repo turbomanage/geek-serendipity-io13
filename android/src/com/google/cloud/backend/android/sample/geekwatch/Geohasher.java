@@ -4,6 +4,8 @@ package com.google.cloud.backend.android.sample.geekwatch;
 import java.util.BitSet;
 import java.util.HashMap;
 
+import com.google.android.gms.maps.model.LatLngBounds;
+
 public class Geohasher {
 
         private static int numbits = 6 * 5;
@@ -118,5 +120,29 @@ public class Geohasher {
                         buf[--charPos] = '-';
                 return new String(buf, charPos, (65 - charPos));
         }
+
+    	protected String findHashForRegion(LatLngBounds visibleBounds) {
+    		double leftLon = visibleBounds.southwest.longitude;
+    		double rightLon = visibleBounds.northeast.longitude;
+    		double topLat = visibleBounds.northeast.latitude;
+    		double bottomLat = visibleBounds.southwest.latitude;
+    		String[] hashedBounds = new String[4];
+    		hashedBounds[0] = this.encode(topLat, leftLon);
+    		hashedBounds[1] = this.encode(topLat, rightLon);
+    		hashedBounds[2] = this.encode(bottomLat, leftLon);
+    		hashedBounds[3] = this.encode(bottomLat, rightLon);
+    		return findCommonGeoPrefix(hashedBounds);
+    	}
+
+    	protected String findCommonGeoPrefix(String[] hashes) {
+    		for (int pos = 0; pos < hashes[0].length(); pos++) {
+    			for (String hash : hashes) {
+    				if (hash.charAt(pos) != hashes[0].charAt(pos)) {
+    					return hashes[0].substring(0, pos);
+    				}
+    			}
+    		}
+    		return hashes[0];
+    	}
 
 }
