@@ -121,7 +121,6 @@ public class GeekwatchActivity extends CloudBackendActivity implements
 		setUpMapIfNeeded();
 		// Show in saved location on unlock, resume
 		if (mCurrentLocation != null) {
-			Toast.makeText(this, "does this?", Toast.LENGTH_LONG).show();
 			LatLng latLng = new LatLng(mCurrentLocation.getLatitude(),
 					mCurrentLocation.getLongitude());
 			mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
