@@ -109,6 +109,7 @@ public class GeekwatchActivity extends CloudBackendActivity implements
                 super.onPause();
                 // save current location
                 SharedPreferences.Editor ed = getPreferences(MODE_PRIVATE).edit();
+                // TODO record cam pos, not user loc
                 ed.putString(KEY_CURRENT_LOC, gh.encode(mCurrentLocation));
                 if (mMap != null) {
                         CameraPosition camPos = mMap.getCameraPosition();
@@ -210,6 +211,7 @@ public class GeekwatchActivity extends CloudBackendActivity implements
                 if (mCurrentLocation == null || firstGoodFix) {
                         LatLng myLocation = new LatLng(lat, lon);
                         // center map on new location
+                        // TODO animate vs. move?
                         mMap.moveCamera(CameraUpdateFactory.newLatLng(myLocation));
                 }
                 mCurrentLocation = location;
@@ -251,18 +253,11 @@ public class GeekwatchActivity extends CloudBackendActivity implements
 
                 // execute the query with the handler
                 CloudQuery cq = new CloudQuery("Geek");
-                // cq.setFilter(F.eq("label", "friends"));
-           
-
-                 cq.setFilter(F.eq(Geek.KEY_GEOHASH, visibleRegionHash));
-                 cq.setLimit(50);
-                 cq.setScope(Scope.FUTURE_AND_PAST);
-                 getCloudBackend().list(cq, handler);
-
-                
-                // TODO Pass visibleRegionHash as a parameter to a standing query
-                //getCloudBackend().listByKind("Geek", CloudEntity.PROP_CREATED_AT,
-                  //              Order.DESC, 50, Scope.FUTURE_AND_PAST, handler);
+                cq.setFilter(F.and(
+                		F.gt(Geek.KEY_GEOHASH, visibleRegionHash),
+                		F.lt(Geek.KEY_GEOHASH, visibleRegionHash + "\uFFFD")));
+                cq.setScope(Scope.FUTURE_AND_PAST);
+                getCloudBackend().list(cq, handler);
         }
 
         private void addMarkersToMap(List<Geek> geeks) {
@@ -336,7 +331,7 @@ public class GeekwatchActivity extends CloudBackendActivity implements
                                                                 final Geek newGeek = new Geek(
                                                                                 GeekwatchActivity.super
                                                                                                 .getAccountName(),
-                                                                                                "Cloud", 
+                                                                                                "Cloud",
                                                                                                 gh.encode(lat, lon));
                                                                 getCloudBackend().insert(newGeek.asEntity(),
                                                                                 handler);
