@@ -4,6 +4,9 @@ package com.google.cloud.backend.android.sample.geekwatch;
 import java.util.BitSet;
 import java.util.HashMap;
 
+import android.location.Location;
+
+import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 
 public class Geohasher {
@@ -78,6 +81,12 @@ public class Geohasher {
                 return mid;
         }
 
+        public String encode (Location loc) {
+        		if (loc != null) {
+        			return encode(loc.getLatitude(), loc.getLongitude());
+        		}
+        		return null;
+        }
 
         public String encode(double lat, double lon) {
                 BitSet latbits = getBits(lat, -90, 90);

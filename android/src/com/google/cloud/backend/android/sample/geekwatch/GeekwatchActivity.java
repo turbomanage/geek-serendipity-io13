@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.Date;
 import java.util.List;
 
+import android.content.SharedPreferences;
 import android.location.Location;
 import android.os.Bundle;
 import android.os.Handler;
@@ -43,7 +44,11 @@ public class GeekwatchActivity extends CloudBackendActivity implements
 	private Location mCurrentLocation;
 	private Location mLastLocation;
 	private Geek geek;
+	// Indicates that we're still waiting for an accurate location fix
+	private boolean mWaitingForLoc = true;
 	private static final Geohasher gh = new Geohasher();
+	private static final String KEY_CURRENT_LOC = "mCurrentLocation";
+	private static final String KEY_ZOOM = "zoom";
 
 	public class CustomInfoWindowAdapter implements InfoWindowAdapter {
 
@@ -76,8 +81,37 @@ public class GeekwatchActivity extends CloudBackendActivity implements
 		locText = (TextView) findViewById(R.id.loc);
 		// Show the Up button in the action bar.
 		getActionBar().setDisplayHomeAsUpEnabled(true);
-		setUpMapIfNeeded();
 		startUpdateTimer();
+	}
+
+	@Override
+	protected void onPause() {
+		super.onPause();
+		// save current location
+		SharedPreferences.Editor ed = getPreferences(MODE_PRIVATE).edit();
+        ed.putString(KEY_CURRENT_LOC, gh.encode(mCurrentLocation));
+        if (mMap != null) {
+        		CameraPosition camPos = mMap.getCameraPosition();
+        		ed.putFloat(KEY_ZOOM, camPos.zoom);
+        }
+        ed.commit();
+	}
+
+	@Override
+	protected void onResume() {
+		super.onResume();
+		setUpMapIfNeeded();
+		// Show in saved location on unlock, resume
+		if (mCurrentLocation != null) {
+			LatLng latLng = new LatLng(mCurrentLocation.getLatitude(), mCurrentLocation.getLongitude());
+			mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
+		} else {
+			SharedPreferences prefs = getPreferences(MODE_PRIVATE);
+			String locHash = prefs.getString(KEY_CURRENT_LOC, "");
+			double[] latLon = gh.decode(locHash);
+			float zoom = prefs.getFloat(KEY_ZOOM, 16f);
+			mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(latLon[0], latLon[1]), zoom));
+		}
 	}
 
 	/**
@@ -92,18 +126,6 @@ public class GeekwatchActivity extends CloudBackendActivity implements
 				handler.postDelayed(this, 120000); // 2 min
 			}
 		});
-	}
-
-	/**
-	 * Send my location to server if we've moved >30m
-	 */
-	private void sendMyLocation() {
-		if (mCurrentLocation != null) {
-			if (mLastLocation == null
-					|| mLastLocation.distanceTo(mCurrentLocation) > 30.) {
-				sendMyLocation(mCurrentLocation);
-			}
-		}
 	}
 
 	@Override
@@ -130,12 +152,6 @@ public class GeekwatchActivity extends CloudBackendActivity implements
 		return super.onOptionsItemSelected(item);
 	}
 
-	@Override
-	protected void onResume() {
-		super.onResume();
-		setUpMapIfNeeded();
-	}
-
 	private void setUpMapIfNeeded() {
 		// Do a null check to confirm that we have not already instantiated the
 		// map.
@@ -152,13 +168,10 @@ public class GeekwatchActivity extends CloudBackendActivity implements
 
 	private void setUpMap() {
 		mMap.setInfoWindowAdapter(new CustomInfoWindowAdapter());
-		// Hide the zoom controls as the button panel will cover it.
 		mMap.getUiSettings().setCompassEnabled(true);
 		mMap.setMyLocationEnabled(true);
 		mMap.setOnCameraChangeListener(this);
 		mMap.setOnMyLocationChangeListener(this);
-		// set zoom only on init
-		mMap.moveCamera(CameraUpdateFactory.zoomTo(16f));
 	}
 
 	@Override
@@ -167,15 +180,24 @@ public class GeekwatchActivity extends CloudBackendActivity implements
 		double lon = location.getLongitude();
 		locText.setText("Current loc:\n" + lat + "\n" + lon + "\n"
 				+ gh.encode(lat, lon));
-		mCurrentLocation = location;
-		// Recenter map only if location has changed > 100m
-		// since camera move triggers a query
-		if (mLastLocation == null
-				|| mLastLocation.distanceTo(location) > 100.) {
+		// on start or first reliable fix, center the map
+		boolean firstGoodFix = mWaitingForLoc && location.getAccuracy() < 30.;
+		if (mCurrentLocation == null || firstGoodFix) {
 			LatLng myLocation = new LatLng(lat, lon);
 			// center map on new location
 			mMap.moveCamera(CameraUpdateFactory.newLatLng(myLocation));
 		}
+		mCurrentLocation = location;
+		if (firstGoodFix) {
+			sendMyLocation();
+			mWaitingForLoc = false;
+		}
+	}
+
+	@Override
+	public void onCameraChange(CameraPosition position) {
+		LatLngBounds visibleBounds = mMap.getProjection().getVisibleRegion().latLngBounds;
+		findGeeks(visibleBounds);
 	}
 
 	private void findGeeks(LatLngBounds visibleBounds) {
@@ -239,13 +261,19 @@ public class GeekwatchActivity extends CloudBackendActivity implements
 		}
 	}
 
-	@Override
-	public void onCameraChange(CameraPosition position) {
-		LatLngBounds visibleBounds = mMap.getProjection().getVisibleRegion().latLngBounds;
-		findGeeks(visibleBounds);
+	/**
+	 * Send location to server if we've moved >30m
+	 */
+	void sendMyLocation() {
+		if (mCurrentLocation != null) {
+			if (mLastLocation == null
+					|| mLastLocation.distanceTo(mCurrentLocation) > 30.) {
+				sendMyLocation(mCurrentLocation);
+			}
+		}
 	}
 
-	private void sendMyLocation(final Location loc) {
+	void sendMyLocation(final Location loc) {
 		final double lat = loc.getLatitude();
 		final double lon = loc.getLongitude();
 		// create a CloudEntity with the new post
