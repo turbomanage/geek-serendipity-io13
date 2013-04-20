@@ -57,7 +57,7 @@ public class GeekwatchActivity extends CloudBackendActivity implements
                 setContentView(R.layout.activity_geekwatch);
                 locText = (TextView) findViewById(R.id.loc);
                 // Show the Up button in the action bar.
-                getActionBar().setDisplayHomeAsUpEnabled(true);
+//                getActionBar().setDisplayHomeAsUpEnabled(true);
         }
 
         @Override

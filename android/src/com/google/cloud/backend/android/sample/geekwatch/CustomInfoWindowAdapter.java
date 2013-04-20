@@ -46,9 +46,9 @@ public class CustomInfoWindowAdapter implements InfoWindowAdapter {
                 } else if (secs < 3600) {
                         return (secs / 60) + " min ago";
                 } else if (secs < 3600 * 24) {
-                        return (secs / 3600) + "hrs ago";
+                        return (secs / 3600) + " hrs ago";
                 } else {
-                        return (secs / 3600 / 24) + "days ago";
+                        return (secs / 3600 / 24) + " days ago";
                 }
         }
 
