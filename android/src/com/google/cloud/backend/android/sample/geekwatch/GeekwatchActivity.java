@@ -1,6 +1,7 @@
 package com.google.cloud.backend.android.sample.geekwatch;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 import android.content.SharedPreferences;
@@ -10,28 +11,23 @@ import android.os.Handler;
 import android.support.v4.app.NavUtils;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.GoogleMap.InfoWindowAdapter;
 import com.google.android.gms.maps.GoogleMap.OnCameraChangeListener;
 import com.google.android.gms.maps.GoogleMap.OnMyLocationChangeListener;
 import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
-import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.cloud.backend.android.CloudBackendActivity;
 import com.google.cloud.backend.android.CloudCallbackHandler;
 import com.google.cloud.backend.android.CloudEntity;
 import com.google.cloud.backend.android.CloudQuery;
-import com.google.cloud.backend.android.CloudQuery.Order;
 import com.google.cloud.backend.android.CloudQuery.Scope;
 import com.google.cloud.backend.android.F;
 import com.google.cloud.backend.android.F.Op;
@@ -48,51 +44,11 @@ public class GeekwatchActivity extends CloudBackendActivity implements
         private Geek mSelf;
         // Indicates that we're still waiting for an accurate location fix
         private boolean mWaitingForLoc = true;
-        private String mInterests = "Cloud";
+        private String mInterests = "Android";
         private static final Geohasher gh = new Geohasher();
         private static final String KEY_CURRENT_LOC = "mCurrentLocation";
         private static final String KEY_ZOOM = "zoom";
-        private static final String KEY_GEEK_ID = "geekId";
-
-        public class CustomInfoWindowAdapter implements InfoWindowAdapter {
-
-                @Override
-                public View getInfoContents(Marker marker) {
-                        View view = getLayoutInflater().inflate(
-                                        R.layout.map_info_window_layout, null);
-                        TextView title = (TextView) view.findViewById(R.id.title);
-                        TextView interest = (TextView) view.findViewById(R.id.interest);
-                        TextView sinceWhen = (TextView) view.findViewById(R.id.sinceWhen);
-                        String[] info = marker.getSnippet().split(":");
-                        title.setText(marker.getTitle());
-                        sinceWhen.setText(sinceWhen(info[0]));
-                        interest.setText(info[1]);
-                        return view;
-                }
-
-                @Override
-                public View getInfoWindow(Marker marker) {
-                        // use default window
-                        return null;
-                }
-
-                private String sinceWhen(String timestamp) {
-                        if (timestamp == null) {
-                                return "";
-                        }
-                        long secs = (System.currentTimeMillis() - Long.valueOf(timestamp)) / 1000;
-                        if (secs < 60) {
-                                return secs + " sec ago";
-                        } else if (secs < 3600) {
-                                return (secs / 60) + " min ago";
-                        } else if (secs < 3600 * 24) {
-                                return (secs / 3600) + "hrs ago";
-                        } else {
-                                return (secs / 3600 / 24) + "days ago";
-                        }
-                }
-
-        }
+		private List<Geek> mGeeks = new ArrayList<Geek>();
 
         @Override
         protected void onCreate(Bundle savedInstanceState) {
@@ -101,7 +57,6 @@ public class GeekwatchActivity extends CloudBackendActivity implements
                 locText = (TextView) findViewById(R.id.loc);
                 // Show the Up button in the action bar.
                 getActionBar().setDisplayHomeAsUpEnabled(true);
-                startUpdateTimer();
         }
 
         @Override
@@ -109,36 +64,29 @@ public class GeekwatchActivity extends CloudBackendActivity implements
                 super.onPause();
                 // save current location
                 SharedPreferences.Editor ed = getPreferences(MODE_PRIVATE).edit();
-                // TODO record cam pos, not user loc
-                ed.putString(KEY_CURRENT_LOC, gh.encode(mCurrentLocation));
                 if (mMap != null) {
                         CameraPosition camPos = mMap.getCameraPosition();
+                        ed.putString(KEY_CURRENT_LOC, gh.encode(camPos.target));
                         ed.putFloat(KEY_ZOOM, camPos.zoom);
                 }
                 ed.commit();
         }
 
-        @Override
-        protected void onResume() {
-                super.onResume();
-                setUpMapIfNeeded();
-                // Show in saved location on unlock, resume
-                if (mCurrentLocation != null) {
-                        LatLng latLng = new LatLng(mCurrentLocation.getLatitude(),
-                                        mCurrentLocation.getLongitude());
-                        mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
-                } else {
-                        if (mSelf == null) {
-                                mSelf = new Geek(super.getAccountName(), mInterests, null);
-                        }
-                        SharedPreferences prefs = getPreferences(MODE_PRIVATE);
-                        String locHash = prefs.getString(KEY_CURRENT_LOC, "");
-                        double[] latLon = gh.decode(locHash);
-                        float zoom = prefs.getFloat(KEY_ZOOM, 16f);
-                        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(
-                                        latLon[0], latLon[1]), zoom));
-                }
-        }
+		@Override
+		protected void onResume() {
+			super.onResume();
+			setUpMapIfNeeded();
+			if (mSelf == null) {
+				mSelf = new Geek(super.getAccountName(), mInterests, null);
+			}
+			SharedPreferences prefs = getPreferences(MODE_PRIVATE);
+			String locHash = prefs.getString(KEY_CURRENT_LOC, "9q8yy");
+			LatLng camPos = gh.decode(locHash);
+			float zoom = prefs.getFloat(KEY_ZOOM, 16f);
+			mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(camPos, zoom));
+			startUpdateTimer();
+			this.mWaitingForLoc = true;
+		}
 
         /**
          * Starts the timer to send location every 2 min
@@ -193,7 +141,7 @@ public class GeekwatchActivity extends CloudBackendActivity implements
         }
 
         private void setUpMap() {
-                mMap.setInfoWindowAdapter(new CustomInfoWindowAdapter());
+                mMap.setInfoWindowAdapter(new CustomInfoWindowAdapter(getLayoutInflater()));
                 mMap.getUiSettings().setCompassEnabled(true);
                 mMap.setMyLocationEnabled(true);
                 mMap.setOnCameraChangeListener(this);
@@ -212,11 +160,11 @@ public class GeekwatchActivity extends CloudBackendActivity implements
                         LatLng myLocation = new LatLng(lat, lon);
                         // center map on new location
                         // TODO animate vs. move?
-                        mMap.moveCamera(CameraUpdateFactory.newLatLng(myLocation));
+                        mMap.animateCamera(CameraUpdateFactory.newLatLng(myLocation));
                 }
                 mCurrentLocation = location;
                 if (firstGoodFix) {
-                        sendMyLocation();
+                        sendMyLocation(location);
                         mWaitingForLoc = false;
                 }
         }
@@ -241,8 +189,8 @@ public class GeekwatchActivity extends CloudBackendActivity implements
                 CloudCallbackHandler<List<CloudEntity>> handler = new CloudCallbackHandler<List<CloudEntity>>() {
                         @Override
                         public void onComplete(List<CloudEntity> results) {
-                                List<Geek> geeks = Geek.fromEntities(results);
-                                addMarkersToMap(geeks);
+                                mGeeks = Geek.fromEntities(results);
+                                drawMarkers();
                         }
 
                         @Override
@@ -251,6 +199,8 @@ public class GeekwatchActivity extends CloudBackendActivity implements
                         }
                 };
 
+                // Remove previous query
+            		getCloudBackend().clearAllSubscription();
                 // execute the query with the handler
                 CloudQuery cq = new CloudQuery("Geek");
                 cq.setFilter(F.and(
@@ -260,29 +210,29 @@ public class GeekwatchActivity extends CloudBackendActivity implements
                 getCloudBackend().list(cq, handler);
         }
 
-        private void addMarkersToMap(List<Geek> geeks) {
+        private void drawMarkers() {
                 mMap.clear();
-                for (Geek geek : geeks) {
-                        double[] latlon = gh.decode(geek.getGeohash());
-                        LatLng pos = new LatLng(latlon[0], latlon[1]);
+                for (Geek geek : mGeeks) {
+                        LatLng pos = gh.decode(geek.getGeohash());
                         // choose marker color
                         float markerColor;
+                        String title;
                         if (geek.equals(mSelf)) {
-                                markerColor = BitmapDescriptorFactory.HUE_AZURE;
+                        		markerColor = BitmapDescriptorFactory.HUE_AZURE;
+                        		title = "UberGeek";
                         } else {
-                                markerColor = BitmapDescriptorFactory.HUE_RED;
+                        		markerColor = BitmapDescriptorFactory.HUE_RED;
+                        		title = geek.getInterest();
                         }
-                        Object geekMarker = mMap.addMarker(new MarkerOptions()
+                        mMap.addMarker(new MarkerOptions()
                                         .position(pos)
-                                        .title(geek.getName())
-                                        .snippet(
-                                                        geek.getUpdatedAt().getTime() + ":"
-                                                                        + geek.getInterest())
+                                        .title(title)
+                                        .snippet("" + geek.getUpdatedAt().getTime())
                                         .icon(BitmapDescriptorFactory.defaultMarker(markerColor)));
                 }
         }
 
-        /**
+		/**
          * Send location to server if we've moved >30m
          */
         void sendMyLocation() {
@@ -302,10 +252,13 @@ public class GeekwatchActivity extends CloudBackendActivity implements
                 final CloudCallbackHandler<CloudEntity> handler = new CloudCallbackHandler<CloudEntity>() {
                         @Override
                         public void onComplete(final CloudEntity result) {
-                                mSelf = new Geek(result);
                                 // Update mLastLocation only after success so timer will keep
                                 // trying otherwise
                                 mLastLocation = loc;
+                                mSelf = new Geek(result);
+                                mGeeks.remove(mSelf);
+                                mGeeks.add(mSelf);
+                                drawMarkers();
                         }
 
                         @Override
@@ -345,8 +298,11 @@ public class GeekwatchActivity extends CloudBackendActivity implements
         }
 
         private void handleEndpointException(IOException e) {
-                Toast.makeText(this, e.toString(), Toast.LENGTH_LONG).show();
-                // btSend.setEnabled(true);
+//        		if (e instanceof UserRecoverableAuthIOException) {
+//        			UserRecoverableAuthIOException authE = (UserRecoverableAuthIOException) e;
+//        			startActivityForResult(authE.getIntent(), 2);
+//        		}
+            Toast.makeText(this, e.toString(), Toast.LENGTH_LONG).show();
         }
 
 }

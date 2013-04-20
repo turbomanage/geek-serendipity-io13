@@ -24,17 +24,17 @@ public class Geohasher {
         }
 
         public static void main(String[] args) {
-                double[] latlon = new Geohasher().decode("dj248j248j24");
-                System.out.println(latlon[0] + " " + latlon[1]);
+                LatLng latlon = new Geohasher().decode("dj248j248j24");
+                System.out.println(latlon.latitude + "," + latlon.longitude);
 
                 Geohasher e = new Geohasher();
                 String s = e.encode(33.786846, -84.382444);
                 System.out.println(s);
                 latlon = e.decode(s);
-                System.out.println(latlon[0] + ", " + latlon[1]);
+                System.out.println(latlon.latitude + "," + latlon.longitude);
         }
 
-        public double[] decode(String geohash) {
+        public LatLng decode(String geohash) {
                 StringBuilder buffer = new StringBuilder();
                 for (char c : geohash.toCharArray()) {
 
@@ -66,7 +66,7 @@ public class Geohasher {
                 double lon = decode(lonset, -180, 180);
                 double lat = decode(latset, -90, 90);
 
-                return new double[] {lat, lon};
+                return new LatLng(lat, lon);
         }
 
         private double decode(BitSet bs, double floor, double ceiling) {
@@ -88,7 +88,14 @@ public class Geohasher {
         		return null;
         }
 
-        public String encode(double lat, double lon) {
+        public String encode(LatLng latLng) {
+        		if (latLng != null) {
+        			return encode(latLng.latitude, latLng.longitude);
+        		}
+        		return null;
+		}
+
+		public String encode(double lat, double lon) {
                 BitSet latbits = getBits(lat, -90, 90);
                 BitSet lonbits = getBits(lon, -180, 180);
                 StringBuilder buffer = new StringBuilder();
