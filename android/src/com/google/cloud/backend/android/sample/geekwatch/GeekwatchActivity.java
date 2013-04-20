@@ -44,6 +44,7 @@ public class GeekwatchActivity extends CloudBackendActivity implements
         private Geek mSelf;
         // Indicates that we're still waiting for an accurate location fix
         private boolean mWaitingForLoc = true;
+        // TODO create UI for declaring interests
         private String mInterests = "Android";
         private static final Geohasher gh = new Geohasher();
         private static final String KEY_CURRENT_LOC = "mCurrentLocation";
@@ -203,6 +204,7 @@ public class GeekwatchActivity extends CloudBackendActivity implements
             		getCloudBackend().clearAllSubscription();
                 // execute the query with the handler
                 CloudQuery cq = new CloudQuery("Geek");
+                // TODO this doesn't work as a standing query
                 cq.setFilter(F.and(
                 		F.gt(Geek.KEY_GEOHASH, visibleRegionHash),
                 		F.lt(Geek.KEY_GEOHASH, visibleRegionHash + "\uFFFD")));
@@ -219,10 +221,10 @@ public class GeekwatchActivity extends CloudBackendActivity implements
                         String title;
                         if (geek.equals(mSelf)) {
                         		markerColor = BitmapDescriptorFactory.HUE_AZURE;
-                        		title = "UberGeek";
+                        		title = "Ubergeek";
                         } else {
                         		markerColor = BitmapDescriptorFactory.HUE_RED;
-                        		title = geek.getInterest();
+                        		title = geek.getInterest() + " Geek";
                         }
                         mMap.addMarker(new MarkerOptions()
                                         .position(pos)
