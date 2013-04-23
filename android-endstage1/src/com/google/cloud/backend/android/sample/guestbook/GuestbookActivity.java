@@ -25,7 +25,7 @@ import com.google.cloud.backend.android.CloudCallbackHandler;
 import com.google.cloud.backend.android.CloudEntity;
 import com.google.cloud.backend.android.CloudQuery.Order;
 import com.google.cloud.backend.android.CloudQuery.Scope;
-import  com.google.example.geekwatch.R;
+import com.google.cloud.backend.android.R;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;

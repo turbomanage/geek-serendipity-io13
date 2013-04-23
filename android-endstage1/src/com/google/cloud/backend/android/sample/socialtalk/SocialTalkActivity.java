@@ -21,7 +21,7 @@ import android.widget.TextView;
 import com.google.cloud.backend.android.CloudBackendActivity;
 import com.google.cloud.backend.android.CloudCallbackHandler;
 import com.google.cloud.backend.android.CloudEntity;
-import com.google.example.geekwatch.R;
+import com.google.cloud.backend.android.R;
 
 import java.text.SimpleDateFormat;
 import java.util.LinkedList;
