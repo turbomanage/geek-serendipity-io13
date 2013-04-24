@@ -43,9 +43,11 @@ public class MapActivity extends CloudBackendActivity {
 		super.onResume();
 		setUpMapIfNeeded();
 		TextView overlay = (TextView) findViewById(R.id.overlay);
+		String username = "anonymous";
 		if (super.getAccountName() != null) {
-			overlay.setText(getAccountName());
+			username = super.getAccountName();
 		}
+		overlay.setText("Signed in as\n" + username);
 	}
 
 	@Override
