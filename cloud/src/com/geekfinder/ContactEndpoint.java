@@ -7,20 +7,19 @@ import java.util.logging.Logger;
 
 import javax.inject.Named;
 
-@Api(name = "contactendpoint")
+@Api(name = "contact")
 public class ContactEndpoint {
 
     private static final Logger log = Logger.getLogger(ContactEndpoint.class.getName());
 
 	  @ApiMethod(
-		      name = "Contact.SendEmail",
+		  name = "Contact.sendEmail",
 	      path = "contact/sendemail/{emailAddress}",
-      httpMethod = HttpMethod.POST
-		  )
-	
-		  public void sendEmail(@Named("emailAddress") String emailAddress) {
-		    log.info("An informational message.");
-		    return ;
-		  }
+          httpMethod = HttpMethod.POST
+	   )
+	  public void sendEmail(@Named("emailAddress") String emailAddress) {
+	      log.info("An informational message.");
+	      return ;
+	   }
 	
 }
