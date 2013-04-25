@@ -3,13 +3,14 @@ package com.google.cloud.backend.android;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.view.Menu;
+import android.widget.TextView;
 
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
 
 public class MapActivity extends FragmentActivity {
 
-		private GoogleMap mMap;
+	private GoogleMap mMap;
 
 	private void setUpMapIfNeeded() {
 		// Do a null check to confirm that we have not already instantiated the
@@ -34,6 +35,14 @@ public class MapActivity extends FragmentActivity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_map);
 		setUpMapIfNeeded();
+	}
+
+	@Override
+	protected void onResume() {
+		super.onResume();
+		setUpMapIfNeeded();
+		TextView overlay = (TextView) findViewById(R.id.overlay);
+		overlay.setText("Not signed in");
 	}
 
 	@Override

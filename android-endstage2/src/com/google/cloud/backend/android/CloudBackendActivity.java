@@ -18,6 +18,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.support.v4.app.FragmentActivity;
 
 import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential;
 
@@ -29,9 +30,9 @@ import java.util.List;
  * Messaging. Developer may create a subclass to use these features. If you want
  * to inherit other {@link Activity} subclasses, you may rewrite the superclass
  * name of the class definition below.
- * 
+ *
  */
-public class CloudBackendActivity extends Activity {
+public class CloudBackendActivity extends FragmentActivity {
 
   private static final int REQUEST_ACCOUNT_PICKER = 2;
 
@@ -46,7 +47,7 @@ public class CloudBackendActivity extends Activity {
 
   /**
    * Returns {@link CloudBackendMessaging} instance for this activity.
-   * 
+   *
    * @return {@link CloudBackendMessaging}
    */
   protected CloudBackendMessaging getCloudBackend() {
@@ -123,7 +124,7 @@ public class CloudBackendActivity extends Activity {
   /**
    * Handles broadcast messages from the backend. Subclasses may override this
    * to handle the message accordingly.
-   * 
+   *
    * @param message
    *          {@link CloudEntity} that contains the message values.
    */
