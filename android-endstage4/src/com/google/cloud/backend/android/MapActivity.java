@@ -73,6 +73,7 @@ public class MapActivity extends CloudBackendActivity implements
 		mMap.addMarker(new MarkerOptions().position(gh.decode(myLocation))
 				.title("UberGeek").snippet(myLocation)
 				.icon(BitmapDescriptorFactory.defaultMarker(markerColor)));
+
 	}
 
 	@Override

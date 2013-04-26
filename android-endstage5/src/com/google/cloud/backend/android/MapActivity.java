@@ -73,6 +73,44 @@ public class MapActivity extends CloudBackendActivity implements
 		mMap.addMarker(new MarkerOptions().position(gh.decode(myLocation))
 				.title("UberGeek").snippet(myLocation)
 				.icon(BitmapDescriptorFactory.defaultMarker(markerColor)));
+
+	}
+
+	private void queryGeeks() {
+		CloudCallbackHandler<List<CloudEntity>> handler = new CloudCallbackHandler<List<CloudEntity>>() {
+			@Override
+			public void onComplete(List<CloudEntity> results) {
+				drawMarkers(results);
+			}
+
+			@Override
+			public void onError(IOException e) {
+				Toast.makeText(getApplicationContext(), e.getMessage(),
+						Toast.LENGTH_LONG).show();
+			}
+		};
+
+		// Remove previous query
+		getCloudBackend().clearAllSubscription();
+
+		CloudQuery cq = new CloudQuery("Geek");
+		cq.setLimit(50);
+		cq.setScope(Scope.FUTURE_AND_PAST);
+		getCloudBackend().list(cq, handler);
+	}
+
+	protected void drawMarkers(List<CloudEntity> results) {
+		mMap.clear();
+		for (CloudEntity geek : results) {
+			float markerColor = BitmapDescriptorFactory.HUE_RED;
+			String locHash = (String) geek.get("location");
+			mMap.addMarker(new MarkerOptions()
+					.position(gh.decode(locHash))
+					.title("Some Geek")
+					.snippet(myLocation)
+					.icon(BitmapDescriptorFactory.defaultMarker(markerColor)));
+		}
+		drawMyMarker();
 	}
 
 	@Override
@@ -92,6 +130,7 @@ public class MapActivity extends CloudBackendActivity implements
 			username = super.getAccountName();
 		}
 		overlay.setText(username);
+		queryGeeks();
 	}
 
 	@Override
