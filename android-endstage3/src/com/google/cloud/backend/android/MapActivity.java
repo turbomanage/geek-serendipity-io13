@@ -1,15 +1,19 @@
 package com.google.cloud.backend.android;
 
+import android.location.Location;
 import android.os.Bundle;
-import android.support.v4.app.FragmentActivity;
 import android.view.Menu;
-import android.view.View;
 import android.widget.TextView;
 
 import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.GoogleMap.OnMyLocationChangeListener;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.SupportMapFragment;
 
-public class MapActivity extends CloudBackendActivity {
+public class MapActivity extends CloudBackendActivity implements
+		OnMyLocationChangeListener {
 
 	private GoogleMap mMap;
 
@@ -29,6 +33,43 @@ public class MapActivity extends CloudBackendActivity {
 
 	private void setUpMap() {
 		mMap.setMyLocationEnabled(true);
+		mMap.setOnMyLocationChangeListener(this);
+	}
+
+	@Override
+	public void onMyLocationChange(Location location) {
+		this.myLocation = gh.encode(location);
+		if (!locSent) {
+			sendMyLocation();
+		}
+	}
+
+	protected String myLocation;
+	protected boolean locSent;
+	private static final Geohasher gh = new Geohasher();
+
+	private void sendMyLocation() {
+		CloudEntity self = new CloudEntity("Geek");
+		self.put("interest", "Cloud");
+		self.put("location", this.myLocation);
+		// getCloudBackend().update
+		getCloudBackend().update(self, new CloudCallbackHandler<CloudEntity>() {
+			@Override
+			public void onComplete(CloudEntity results) {
+				locSent = true;
+				drawMyMarker();
+			}
+		});
+	}
+
+	private void drawMyMarker() {
+        float markerColor = BitmapDescriptorFactory.HUE_AZURE;
+        mMap.addMarker(new MarkerOptions()
+                        .position(gh.decode(myLocation))
+                        .title("UberGeek")
+                        .snippet(myLocation)
+                        .icon(BitmapDescriptorFactory.defaultMarker(markerColor)));
+
 	}
 
 	@Override
@@ -43,11 +84,11 @@ public class MapActivity extends CloudBackendActivity {
 		super.onResume();
 		setUpMapIfNeeded();
 		TextView overlay = (TextView) findViewById(R.id.overlay);
-		String username = "anonymous";
+		String username = "Not signed in";
 		if (super.getAccountName() != null) {
 			username = super.getAccountName();
 		}
-		overlay.setText("Signed in as\n" + username);
+		overlay.setText(username);
 	}
 
 	@Override
