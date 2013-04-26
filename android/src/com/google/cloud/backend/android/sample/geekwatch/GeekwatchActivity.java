@@ -204,12 +204,9 @@ public class GeekwatchActivity extends CloudBackendActivity implements
                     // TODO this doesn't work as a standing query
 
             	CloudQuery cq = new CloudQuery("Geek");
-                cq.setFilter(F.eq("LOCATION",visibleRegionHash));
                 cq.setLimit(50);
                 cq.setScope(Scope.FUTURE_AND_PAST);
                 getCloudBackend().list(cq, handler);
-                
-                
         }
 
         private void drawMarkers() {

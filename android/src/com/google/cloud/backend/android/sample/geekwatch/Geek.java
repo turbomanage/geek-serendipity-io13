@@ -46,7 +46,7 @@ public class Geek {
 	public boolean equals(Object o) {
 		if (o!= null && o instanceof Geek) {
 			Geek g = (Geek) o;
-			if (this.getName().equals(g.getName())) {
+			if (g.getName() != null && g.getName().equals(this.getName())) {
 				return true;
 			}
 		}
