@@ -1,16 +1,20 @@
 package com.google.cloud.backend.android;
 
+import java.io.IOException;
+import java.util.List;
+
 import android.location.Location;
 import android.os.Bundle;
 import android.view.Menu;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.GoogleMap.OnMyLocationChangeListener;
-import com.google.android.gms.maps.model.BitmapDescriptorFactory;
-import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.cloud.backend.android.CloudQuery.Scope;
 
 public class MapActivity extends CloudBackendActivity implements
 		OnMyLocationChangeListener {
@@ -63,13 +67,50 @@ public class MapActivity extends CloudBackendActivity implements
 	}
 
 	private void drawMyMarker() {
-        float markerColor = BitmapDescriptorFactory.HUE_AZURE;
-        mMap.addMarker(new MarkerOptions()
-                        .position(gh.decode(myLocation))
-                        .title("UberGeek")
-                        .snippet(myLocation)
-                        .icon(BitmapDescriptorFactory.defaultMarker(markerColor)));
+		if (myLocation == null)
+			return;
+		float markerColor = BitmapDescriptorFactory.HUE_AZURE;
+		mMap.addMarker(new MarkerOptions().position(gh.decode(myLocation))
+				.title("UberGeek").snippet(myLocation)
+				.icon(BitmapDescriptorFactory.defaultMarker(markerColor)));
 
+	}
+
+	private void queryGeeks() {
+		CloudCallbackHandler<List<CloudEntity>> handler = new CloudCallbackHandler<List<CloudEntity>>() {
+			@Override
+			public void onComplete(List<CloudEntity> results) {
+				drawMarkers(results);
+			}
+
+			@Override
+			public void onError(IOException e) {
+				Toast.makeText(getApplicationContext(), e.getMessage(),
+						Toast.LENGTH_LONG).show();
+			}
+		};
+
+		// Remove previous query
+		getCloudBackend().clearAllSubscription();
+
+		CloudQuery cq = new CloudQuery("Geek");
+		cq.setLimit(50);
+		cq.setScope(Scope.FUTURE_AND_PAST);
+		getCloudBackend().list(cq, handler);
+	}
+
+	protected void drawMarkers(List<CloudEntity> results) {
+		mMap.clear();
+		for (CloudEntity geek : results) {
+			float markerColor = BitmapDescriptorFactory.HUE_RED;
+			String locHash = (String) geek.get("location");
+			mMap.addMarker(new MarkerOptions()
+					.position(gh.decode(locHash))
+					.title("Some Geek")
+					.snippet(myLocation)
+					.icon(BitmapDescriptorFactory.defaultMarker(markerColor)));
+		}
+		drawMyMarker();
 	}
 
 	@Override
@@ -89,6 +130,7 @@ public class MapActivity extends CloudBackendActivity implements
 			username = super.getAccountName();
 		}
 		overlay.setText(username);
+		queryGeeks();
 	}
 
 	@Override
