@@ -8,7 +8,6 @@ import android.content.SharedPreferences;
 import android.location.Location;
 import android.os.Bundle;
 import android.os.Handler;
-import android.support.v4.app.FragmentManager;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.TextView;
@@ -48,8 +47,7 @@ public class GeekwatchActivity extends CloudBackendActivity implements
         private static final Geohasher gh = new Geohasher();
         private static final String KEY_CURRENT_LOC = "mCurrentLocation";
         private static final String KEY_ZOOM = "zoom";
-		static final String KEY_INTEREST = "interest";
-		private static final int CHOOSE_INTEREST = 1;
+		private static final String KEY_INTEREST = "interest";
 		private List<Geek> mGeeks = new ArrayList<Geek>();
 
         @Override
@@ -65,7 +63,6 @@ public class GeekwatchActivity extends CloudBackendActivity implements
         @Override
         protected void onPostCreate() {
         		super.onPostCreate();
-    			SharedPreferences prefs = getPreferences(MODE_PRIVATE);
     			mInterest = getSelectedInterest();
     			if (mInterest == null) {
     				showInterestPickerDialog();
@@ -90,9 +87,6 @@ public class GeekwatchActivity extends CloudBackendActivity implements
 			super.onResume();
 			setUpMapIfNeeded();
 			SharedPreferences prefs = getPreferences(MODE_PRIVATE);
-//			if (mSelf == null) {
-//				mSelf = new Geek(super.getAccountName(), mInterest, null);
-//			}
 			String locHash = prefs.getString(KEY_CURRENT_LOC, "9q8yy");
 			LatLng camPos = gh.decode(locHash);
 			float zoom = prefs.getFloat(KEY_ZOOM, 16f);
@@ -133,7 +127,6 @@ public class GeekwatchActivity extends CloudBackendActivity implements
         }
 
         private void showInterestPickerDialog() {
-			FragmentManager fm = getSupportFragmentManager();
 			InterestPickerDialog dlg = new InterestPickerDialog();
 			dlg.show(getSupportFragmentManager(), "interests");
 		}
@@ -227,7 +220,7 @@ public class GeekwatchActivity extends CloudBackendActivity implements
 					LatLng pos = gh.decode(geek.getGeohash());
 					// choose marker color
 					float markerColor = BitmapDescriptorFactory.HUE_RED;
-					if (geek.getName() == null || geek.getName().equals(super.getAccountName())) {
+					if (geek.getName() != null && geek.getName().equals(super.getAccountName())) {
 						markerColor = BitmapDescriptorFactory.HUE_AZURE;
 					}
 					mMap.addMarker(new MarkerOptions()
