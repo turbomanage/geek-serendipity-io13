@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="interests">
+        <item>Android</item>
+        <item>Cloud</item>
+        <item>Chrome</item>
+        <item>Commerce</item>
+        <item>G+</item>
+        <item>GWT</item>
+        <item>Maps</item>
+        <item>YouTube</item>
+        <item>I Am Not a</item>
+    </string-array>
+</resources>

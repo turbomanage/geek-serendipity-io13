@@ -51,7 +51,7 @@
             </intent-filter>
         </activity>
 
-        <!--
+<!--
  You can replace the android:name attribute above with one of the the following
  lines to choose a sample:
 

@@ -94,7 +94,7 @@ public class CloudBackendActivity extends FragmentActivity {
     }
 
     // post create initialization
-    _onPostCreate();
+//    _onPostCreate();
   }
 
   private void _onPostCreate() {
@@ -137,7 +137,7 @@ public class CloudBackendActivity extends FragmentActivity {
    * picking.
    */
   @Override
-  protected final void onActivityResult(int requestCode, int resultCode, Intent data) {
+  protected void onActivityResult(int requestCode, int resultCode, Intent data) {
     super.onActivityResult(requestCode, resultCode, data);
 
     switch (requestCode) {

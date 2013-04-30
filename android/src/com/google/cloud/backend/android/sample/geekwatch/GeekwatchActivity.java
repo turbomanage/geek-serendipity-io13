@@ -8,7 +8,7 @@ import android.content.SharedPreferences;
 import android.location.Location;
 import android.os.Bundle;
 import android.os.Handler;
-import android.support.v4.app.NavUtils;
+import android.support.v4.app.FragmentManager;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.TextView;
@@ -29,12 +29,12 @@ import com.google.cloud.backend.android.CloudCallbackHandler;
 import com.google.cloud.backend.android.CloudEntity;
 import com.google.cloud.backend.android.CloudQuery;
 import com.google.cloud.backend.android.CloudQuery.Scope;
-import com.google.cloud.backend.android.F;
 import com.google.cloud.backend.android.F.Op;
 import com.google.cloud.backend.android.R;
+import com.google.cloud.backend.android.sample.geekwatch.InterestPickerDialog.HasGeekInterest;
 
 public class GeekwatchActivity extends CloudBackendActivity implements
-                OnCameraChangeListener, OnMyLocationChangeListener {
+                OnCameraChangeListener, OnMyLocationChangeListener, HasGeekInterest {
 
         private GoogleMap mMap;
         private TextView locText;
@@ -44,11 +44,12 @@ public class GeekwatchActivity extends CloudBackendActivity implements
         private Geek mSelf;
         // Indicates that we're still waiting for an accurate location fix
         private boolean mWaitingForLoc = true;
-        // TODO create UI for declaring interests
-        private String mInterests = "Android";
+        private String mInterest;
         private static final Geohasher gh = new Geohasher();
         private static final String KEY_CURRENT_LOC = "mCurrentLocation";
         private static final String KEY_ZOOM = "zoom";
+		static final String KEY_INTEREST = "interest";
+		private static final int CHOOSE_INTEREST = 1;
 		private List<Geek> mGeeks = new ArrayList<Geek>();
 
         @Override
@@ -56,6 +57,19 @@ public class GeekwatchActivity extends CloudBackendActivity implements
                 super.onCreate(savedInstanceState);
                 setContentView(R.layout.activity_geekwatch);
                 locText = (TextView) findViewById(R.id.loc);
+        }
+
+        /* (non-Javadoc)
+         * @see com.google.cloud.backend.android.CloudBackendActivity#onPostCreate()
+         */
+        @Override
+        protected void onPostCreate() {
+        		super.onPostCreate();
+    			SharedPreferences prefs = getPreferences(MODE_PRIVATE);
+    			mInterest = getSelectedInterest();
+    			if (mInterest == null) {
+    				showInterestPickerDialog();
+    			}
         }
 
         @Override
@@ -75,10 +89,10 @@ public class GeekwatchActivity extends CloudBackendActivity implements
 		protected void onResume() {
 			super.onResume();
 			setUpMapIfNeeded();
-			if (mSelf == null) {
-				mSelf = new Geek(super.getAccountName(), mInterests, null);
-			}
 			SharedPreferences prefs = getPreferences(MODE_PRIVATE);
+//			if (mSelf == null) {
+//				mSelf = new Geek(super.getAccountName(), mInterest, null);
+//			}
 			String locHash = prefs.getString(KEY_CURRENT_LOC, "9q8yy");
 			LatLng camPos = gh.decode(locHash);
 			float zoom = prefs.getFloat(KEY_ZOOM, 16f);
@@ -111,21 +125,20 @@ public class GeekwatchActivity extends CloudBackendActivity implements
         @Override
         public boolean onOptionsItemSelected(MenuItem item) {
                 switch (item.getItemId()) {
-                case android.R.id.home:
-                        // This ID represents the Home or Up button. In the case of this
-                        // activity, the Up button is shown. Use NavUtils to allow users
-                        // to navigate up one level in the application structure. For
-                        // more details, see the Navigation pattern on Android Design:
-                        //
-                        // http://developer.android.com/design/patterns/navigation.html#up-vs-back
-                        //
-                        NavUtils.navigateUpFromSameTask(this);
-                        return true;
+                case R.id.menu_settings:
+                		showInterestPickerDialog();
+                		return true;
                 }
                 return super.onOptionsItemSelected(item);
         }
 
-        private void setUpMapIfNeeded() {
+        private void showInterestPickerDialog() {
+			FragmentManager fm = getSupportFragmentManager();
+			InterestPickerDialog dlg = new InterestPickerDialog();
+			dlg.show(getSupportFragmentManager(), "interests");
+		}
+
+		private void setUpMapIfNeeded() {
                 // Do a null check to confirm that we have not already instantiated the
                 // map.
                 if (mMap == null) {
@@ -201,35 +214,31 @@ public class GeekwatchActivity extends CloudBackendActivity implements
                 // Remove previous query
             		getCloudBackend().clearAllSubscription();
                 // execute the query with the handler
-                    // TODO this doesn't work as a standing query
-
             	CloudQuery cq = new CloudQuery("Geek");
                 cq.setLimit(50);
                 cq.setScope(Scope.FUTURE_AND_PAST);
                 getCloudBackend().list(cq, handler);
         }
 
-        private void drawMarkers() {
-                mMap.clear();
-                for (Geek geek : mGeeks) {
-                        LatLng pos = gh.decode(geek.getGeohash());
-                        // choose marker color
-                        float markerColor;
-                        String title;
-                        if (geek.equals(mSelf)) {
-                        		markerColor = BitmapDescriptorFactory.HUE_AZURE;
-                        		title = "Ubergeek";
-                        } else {
-                        		markerColor = BitmapDescriptorFactory.HUE_RED;
-                        		title = geek.getInterest() + " Geek";
-                        }
-                        mMap.addMarker(new MarkerOptions()
-                                        .position(pos)
-                                        .title(title)
-                                        .snippet("" + geek.getUpdatedAt().getTime())
-                                        .icon(BitmapDescriptorFactory.defaultMarker(markerColor)));
-                }
-        }
+		private void drawMarkers() {
+			mMap.clear();
+			for (Geek geek : mGeeks) {
+				if (geek.getGeohash() != null) {
+					LatLng pos = gh.decode(geek.getGeohash());
+					// choose marker color
+					float markerColor = BitmapDescriptorFactory.HUE_RED;
+					if (geek.getName() == null || geek.getName().equals(super.getAccountName())) {
+						markerColor = BitmapDescriptorFactory.HUE_AZURE;
+					}
+					mMap.addMarker(new MarkerOptions()
+						.position(pos)
+						.title(geek.getInterest() + " Geek")
+						.snippet("" + geek.getUpdatedAt().getTime())
+						.icon(BitmapDescriptorFactory
+								.defaultMarker(markerColor)));
+				}
+			}
+		}
 
 		/**
          * Send location to server if we've moved >30m
@@ -243,29 +252,25 @@ public class GeekwatchActivity extends CloudBackendActivity implements
                 }
         }
 
+		final CloudCallbackHandler<CloudEntity> updateHandler = new CloudCallbackHandler<CloudEntity>() {
+			@Override
+			public void onComplete(final CloudEntity result) {
+				// Update mLastLocation only after success so timer will keep
+				// trying otherwise
+				mLastLocation = mCurrentLocation;
+				mSelf = new Geek(result);
+				mGeeks.remove(mSelf);
+				mGeeks.add(mSelf);
+				drawMarkers();
+			}
+
+			@Override
+			public void onError(final IOException exception) {
+				handleEndpointException(exception);
+			}
+		};
+
         void sendMyLocation(final Location loc) {
-                final double lat = loc.getLatitude();
-                final double lon = loc.getLongitude();
-                // create a CloudEntity with the new post
-                // create a response handler that will receive the result or an error
-                final CloudCallbackHandler<CloudEntity> handler = new CloudCallbackHandler<CloudEntity>() {
-                        @Override
-                        public void onComplete(final CloudEntity result) {
-                                // Update mLastLocation only after success so timer will keep
-                                // trying otherwise
-                                mLastLocation = loc;
-                                mSelf = new Geek(result);
-                                mGeeks.remove(mSelf);
-                                mGeeks.add(mSelf);
-                                drawMarkers();
-                        }
-
-                        @Override
-                        public void onError(final IOException exception) {
-                                handleEndpointException(exception);
-                        }
-                };
-
                 // execute the insertion with the handler
                 // query for existing username before inserting
                 if (mSelf == null || mSelf.asEntity().getId() == null) {
@@ -276,32 +281,49 @@ public class GeekwatchActivity extends CloudBackendActivity implements
                                                 public void onComplete(List<CloudEntity> results) {
                                                         if (results.size() > 0) {
                                                                 mSelf = new Geek(results.get(0));
-                                                                mSelf.setGeohash(gh.encode(lat, lon));
+                                                                mSelf.setGeohash(gh.encode(loc));
+                                                                mSelf.setInterest(mInterest);
                                                                 getCloudBackend().update(mSelf.asEntity(),
-                                                                                handler);
+                                                                                updateHandler);
                                                         } else {
                                                                 final Geek newGeek = new Geek(
                                                                                 GeekwatchActivity.super
                                                                                                 .getAccountName(),
-                                                                                                "Cloud",
-                                                                                                gh.encode(lat, lon));
+                                                                                                mInterest,
+                                                                                                gh.encode(loc));
                                                                 getCloudBackend().insert(newGeek.asEntity(),
-                                                                                handler);
+                                                                                updateHandler);
                                                         }
                                                 }
                                         });
                 } else {
-                        mSelf.setGeohash(gh.encode(lat, lon));
-                        getCloudBackend().update(mSelf.asEntity(), handler);
+                        mSelf.setGeohash(gh.encode(loc));
+                        mSelf.setInterest(mInterest);
+                        getCloudBackend().update(mSelf.asEntity(), updateHandler);
                 }
         }
 
         private void handleEndpointException(IOException e) {
-//        		if (e instanceof UserRecoverableAuthIOException) {
-//        			UserRecoverableAuthIOException authE = (UserRecoverableAuthIOException) e;
-//        			startActivityForResult(authE.getIntent(), 2);
-//        		}
             Toast.makeText(this, e.toString(), Toast.LENGTH_LONG).show();
         }
+
+        @Override
+		public String getSelectedInterest() {
+			SharedPreferences prefs = getPreferences(MODE_PRIVATE);
+			String interest = prefs.getString(KEY_INTEREST, null);
+			return interest;
+		}
+
+		@Override
+		public void setSelectedInterest(String interest) {
+			mInterest = interest;
+	        SharedPreferences.Editor ed = getPreferences(MODE_PRIVATE).edit();
+	        ed.putString(GeekwatchActivity.KEY_INTEREST, interest);
+	        ed.commit();
+			if (mSelf != null) {
+				mSelf.setInterest(mInterest);
+				getCloudBackend().update(mSelf.asEntity(), updateHandler);
+			}
+		}
 
 }
