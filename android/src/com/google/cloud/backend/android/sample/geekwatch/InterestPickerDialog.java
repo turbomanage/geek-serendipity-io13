@@ -12,7 +12,6 @@ import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
-import com.google.cloud.backend.android.R;
 
 public class InterestPickerDialog extends DialogFragment {
 

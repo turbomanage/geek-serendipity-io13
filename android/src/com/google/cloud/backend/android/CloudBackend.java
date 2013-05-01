@@ -38,7 +38,7 @@ import java.util.List;
  * directly from UI thread of {@link Activity} or {@link Fragment}. (Use
  * {@link CloudBackendAsync} for calling backend from UI thread). See
  * {@link CloudBackendTest} for detailed usage.
- * 
+ *
  * @author kazsato
  */
 public class CloudBackend {
@@ -55,7 +55,7 @@ public class CloudBackend {
    * Sets {@link GoogleAccountCredential} that will be used on all backend
    * calls. By setting null, all call will not be associated with user account
    * info.
-   * 
+   *
    * @param credential
    *          {@link GoogleAccountCredential}
    */
@@ -65,7 +65,7 @@ public class CloudBackend {
 
   /**
    * Returns {@link GoogleAccountCredential} that has been set to this backend.
-   * 
+   *
    * @return {@link GoogleAccountCredential}
    */
   public GoogleAccountCredential getCredential() {
@@ -99,7 +99,7 @@ public class CloudBackend {
 
   /**
    * Inserts a CloudEntity into the backend synchronously.
-   * 
+   *
    * @param ce
    *          {@link CloudEntity} for inserting a CloudEntity.
    * @return {@link CloudEntity} that has updated fields (like updatedAt and new
@@ -119,7 +119,7 @@ public class CloudBackend {
    * Updates the specified {@link CloudEntity} on the backend synchronously. If
    * it does not have any Id, it creates a new Entity. If it has, find the
    * existing entity and update it.
-   * 
+   *
    * @param ce
    *          {@link CloudEntity} for updating a CloudEntity.
    * @return {@link CloudEntity} that has updated fields (like updatedAt and new
@@ -138,7 +138,7 @@ public class CloudBackend {
   /**
    * Inserts multiple {@link CloudEntity}s on the backend synchronously. Works
    * just the same as {@link #insert(CloudEntity)}.
-   * 
+   *
    * @param ceList
    *          {@link List} that holds {@link CloudEntity}s to save.
    * @return {@link List} that has updated {@link CloudEntity}s.
@@ -166,7 +166,7 @@ public class CloudBackend {
   /**
    * Updates multiple {@link CloudEntity}s on the backend synchronously. Works
    * just the same as {@link #update(CloudEntity)}.
-   * 
+   *
    * @param coList
    *          {@link List} that holds {@link CloudEntity}s to save.
    * @return {@link List} that has updated {@link CloudEntity}s.
@@ -193,7 +193,7 @@ public class CloudBackend {
 
   /**
    * Reads the specified {@link CloudEntity} synchronously.
-   * 
+   *
    * @param kindName
    *          Name of the table for the CloudEntity to get.
    * @param id
@@ -212,7 +212,7 @@ public class CloudBackend {
   /**
    * Reads all the {@link CloudEntity}s synchronously specified by the
    * {@link List} of Ids.
-   * 
+   *
    * @param kindName
    *          Name of the table for the CloudEntities to get.
    * @param idList
@@ -259,7 +259,7 @@ public class CloudBackend {
 
   /**
    * Deletes the specified {@link CloudEntity} synchronously.
-   * 
+   *
    * @param kindName
    *          Name of the table for the CloudEntity to delete.
    * @param id
@@ -274,7 +274,7 @@ public class CloudBackend {
 
   /**
    * Deletes the specified {@link CloudEntity} synchronously.
-   * 
+   *
    * @param co
    *          {@link CloudEntity} to delete
    * @throws IOException
@@ -287,7 +287,7 @@ public class CloudBackend {
 
   /**
    * Deletes all the specified {@link CloudEntity}s synchronously.
-   * 
+   *
    * @param kindName
    *          Name of the table for the CloudEntity to delete.
    * @param idList
@@ -307,7 +307,7 @@ public class CloudBackend {
 
   /**
    * Deletes all the specified {@link CloudEntity}s synchronously.
-   * 
+   *
    * @param kindName
    *          Name of the table for the CloudEntity to delete.
    * @param coList
@@ -325,7 +325,7 @@ public class CloudBackend {
 
   /**
    * Executes a query synchronously with specified {@link CloudQuery}.
-   * 
+   *
    * @param query
    *          {@link CloudQuery} to execute.
    * @return {@link List} of {@link CloudEntity} of the result.
@@ -339,7 +339,7 @@ public class CloudBackend {
     QueryDto cq = query.convertToQueryDto();
     Log.i(Consts.TAG, "list: executing query: " + cq);
     cbList = getMBSEndpoint().list(cq).execute();
-    Log.i(Consts.TAG, "list: result: " + cbList.getEntries());
+//    Log.i(Consts.TAG, "list: result: " + cbList.getEntries());
 
     // convert the result to List
     List<CloudEntity> coList = new LinkedList<CloudEntity>();

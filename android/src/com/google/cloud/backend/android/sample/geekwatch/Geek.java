@@ -42,22 +42,6 @@ public class Geek {
 		return geeks;
 	}
 
-	@Override
-	public boolean equals(Object o) {
-		if (o!= null && o instanceof Geek) {
-			Geek g = (Geek) o;
-			if (g.getName() != null && g.getName().equals(this.getName())) {
-				return true;
-			}
-		}
-		return false;
-	}
-
-	@Override
-	public int hashCode() {
-		return this.getName().hashCode();
-	}
-
 	public String getName() {
 		return (String) cloudEntity.get(KEY_NAME);
 	}

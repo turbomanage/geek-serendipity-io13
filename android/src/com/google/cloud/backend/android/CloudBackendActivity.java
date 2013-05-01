@@ -94,7 +94,7 @@ public class CloudBackendActivity extends FragmentActivity {
     }
 
     // post create initialization
-//    _onPostCreate();
+    _onPostCreate();
   }
 
   private void _onPostCreate() {
