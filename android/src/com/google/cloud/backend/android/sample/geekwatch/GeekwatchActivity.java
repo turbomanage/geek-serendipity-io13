@@ -219,9 +219,15 @@ public class GeekwatchActivity extends CloudBackendActivity implements
 				if (geek.getGeohash() != null) {
 					LatLng pos = gh.decode(geek.getGeohash());
 					// choose marker color
-					float markerColor = BitmapDescriptorFactory.HUE_RED;
+					float markerColor;
 					if (geek.getName() != null && geek.getName().equals(super.getAccountName())) {
 						markerColor = BitmapDescriptorFactory.HUE_AZURE;
+					} else {
+						if (geek.getInterest() != null) {
+							markerColor = InterestPickerDialog.getInterestColor(geek.getInterest());
+						} else {
+							markerColor = BitmapDescriptorFactory.HUE_RED;
+						}
 					}
 					mMap.addMarker(new MarkerOptions()
 						.position(pos)

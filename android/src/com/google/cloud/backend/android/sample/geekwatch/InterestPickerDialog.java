@@ -1,5 +1,8 @@
 package com.google.cloud.backend.android.sample.geekwatch;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.AlertDialog.Builder;
@@ -8,6 +11,7 @@ import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.cloud.backend.android.R;
 
 public class InterestPickerDialog extends DialogFragment {
@@ -17,7 +21,35 @@ public class InterestPickerDialog extends DialogFragment {
 		void setSelectedInterest(String interest);
 	}
 
-	private String[] interests;
+	private static final String[] interests = new String[] {
+		"Android",
+		"Cloud",
+		"Chrome",
+		"Commerce",
+		"G+",
+		"GWT",
+		"Maps",
+		"YouTube",
+		"I Am Not a"
+	};
+	private static final float[] colors = new float[] {
+		80f,
+		BitmapDescriptorFactory.HUE_CYAN,
+		BitmapDescriptorFactory.HUE_YELLOW,
+		BitmapDescriptorFactory.HUE_GREEN,
+		BitmapDescriptorFactory.HUE_RED,
+		BitmapDescriptorFactory.HUE_BLUE,
+		BitmapDescriptorFactory.HUE_MAGENTA,
+		BitmapDescriptorFactory.HUE_ORANGE,
+		BitmapDescriptorFactory.HUE_VIOLET
+	};
+	private static final Map<String, Float> colorMap = new HashMap<String, Float>();
+
+	static {
+		for (int i = 0; i < interests.length; i++) {
+			colorMap.put(interests[i], colors[i]);
+		}
+	}
 
 	public InterestPickerDialog() {
 		// No-arg constructor required for DialogFragment
@@ -26,7 +58,6 @@ public class InterestPickerDialog extends DialogFragment {
 	@Override
 	public void onAttach(Activity activity) {
 		super.onAttach(activity);
-		interests = getResources().getStringArray(R.array.interests);
 	}
 
 	@Override
@@ -53,6 +84,10 @@ public class InterestPickerDialog extends DialogFragment {
 			}
 		}
 		return -1; // none selected
+	}
+
+	public static float getInterestColor(String interest) {
+		return colorMap.get(interest);
 	}
 
 }
