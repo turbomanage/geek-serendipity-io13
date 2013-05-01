@@ -29,8 +29,7 @@ public class InterestPickerDialog extends DialogFragment {
 		"G+",
 		"GWT",
 		"Maps",
-		"YouTube",
-		"I Am Not a"
+		"YouTube"
 	};
 	private static final float[] colors = new float[] {
 		80f,
@@ -40,8 +39,7 @@ public class InterestPickerDialog extends DialogFragment {
 		BitmapDescriptorFactory.HUE_RED,
 		BitmapDescriptorFactory.HUE_BLUE,
 		BitmapDescriptorFactory.HUE_MAGENTA,
-		BitmapDescriptorFactory.HUE_ORANGE,
-		BitmapDescriptorFactory.HUE_VIOLET
+		BitmapDescriptorFactory.HUE_ORANGE
 	};
 	private static final Map<String, Float> colorMap = new HashMap<String, Float>();
 
@@ -87,7 +85,11 @@ public class InterestPickerDialog extends DialogFragment {
 	}
 
 	public static float getInterestColor(String interest) {
-		return colorMap.get(interest);
+		Float color = colorMap.get(interest);
+		if (color != null) {
+			return color;
+		}
+		return BitmapDescriptorFactory.HUE_RED;
 	}
 
 }
