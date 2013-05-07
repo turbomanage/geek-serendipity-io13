@@ -27,6 +27,7 @@ import com.google.cloud.backend.android.CloudBackendActivity;
 import com.google.cloud.backend.android.CloudCallbackHandler;
 import com.google.cloud.backend.android.CloudEntity;
 import com.google.cloud.backend.android.CloudQuery;
+import com.google.cloud.backend.android.CloudQuery.Order;
 import com.google.cloud.backend.android.CloudQuery.Scope;
 import com.google.cloud.backend.android.F.Op;
 import com.google.cloud.backend.android.R;
@@ -90,7 +91,12 @@ public class GeekwatchActivity extends CloudBackendActivity implements
 			String locHash = prefs.getString(KEY_CURRENT_LOC, "9q8yy");
 			LatLng camPos = gh.decode(locHash);
 			float zoom = prefs.getFloat(KEY_ZOOM, 16f);
-			mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(camPos, zoom));
+			try {
+			    mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(camPos, zoom));
+            } catch (Exception e) {
+                // gulp: CameraUpdateFactory not ready if Google Play Services
+                // needs to be updated
+            }
 			startUpdateTimer();
 			this.mWaitingForLoc = true;
 		}
@@ -157,7 +163,7 @@ public class GeekwatchActivity extends CloudBackendActivity implements
         public void onMyLocationChange(Location location) {
                 double lat = location.getLatitude();
                 double lon = location.getLongitude();
-                locText.setText("Current loc:\n" + lat + "\n" + lon + "\n"
+                locText.setText("My location:\n" + lat + "\n" + lon + "\n"
                                 + gh.encode(lat, lon));
                 // on start or first reliable fix, center the map
                 boolean firstGoodFix = mWaitingForLoc && location.getAccuracy() < 30.;
@@ -176,16 +182,17 @@ public class GeekwatchActivity extends CloudBackendActivity implements
 
         @Override
         public void onCameraChange(CameraPosition position) {
-                LatLngBounds visibleBounds = mMap.getProjection().getVisibleRegion().latLngBounds;
-                findGeeks(visibleBounds);
+//                LatLngBounds visibleBounds = mMap.getProjection().getVisibleRegion().latLngBounds;
+//                String visibleRegionHash = gh.findHashForRegion(visibleBounds);
+                String visibleRegionHash = "allGeeks";
+                findGeeks(visibleRegionHash);
         }
 
-        private void findGeeks(LatLngBounds visibleBounds) {
-                String visibleRegionHash = gh.findHashForRegion(visibleBounds);
+        private void findGeeks(String visibleRegionHash) {
                 // We've moved or the visible region has changed
                 if (!visibleRegionHash.equals(mCurrentRegionHash)) {
                         mCurrentRegionHash = visibleRegionHash;
-                        Toast.makeText(this, visibleRegionHash, Toast.LENGTH_LONG).show();
+//                        Toast.makeText(this, visibleRegionHash, Toast.LENGTH_LONG).show();
                         queryGeeksWithin(visibleRegionHash);
                 }
         }
@@ -208,7 +215,8 @@ public class GeekwatchActivity extends CloudBackendActivity implements
             		getCloudBackend().clearAllSubscription();
                 // execute the query with the handler
             	CloudQuery cq = new CloudQuery("Geek");
-                cq.setLimit(50);
+            	    cq.setSort(CloudEntity.PROP_UPDATED_AT, Order.DESC);
+                cq.setLimit(100);
                 cq.setScope(Scope.FUTURE_AND_PAST);
                 getCloudBackend().list(cq, handler);
         }
