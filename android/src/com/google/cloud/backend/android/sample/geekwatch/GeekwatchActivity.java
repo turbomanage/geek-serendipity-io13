@@ -92,6 +92,7 @@ public class GeekwatchActivity extends CloudBackendActivity implements
 			LatLng camPos = gh.decode(locHash);
 			float zoom = prefs.getFloat(KEY_ZOOM, 16f);
 			try {
+			    this.mCurrentRegionHash = null;
 			    mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(camPos, zoom));
             } catch (Exception e) {
                 // gulp: CameraUpdateFactory not ready if Google Play Services
@@ -311,7 +312,7 @@ public class GeekwatchActivity extends CloudBackendActivity implements
         }
 
         private void handleEndpointException(IOException e) {
-            Toast.makeText(this, e.toString(), Toast.LENGTH_LONG).show();
+//            Toast.makeText(this, e.toString(), Toast.LENGTH_LONG).show();
         }
 
         @Override
