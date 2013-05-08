@@ -153,7 +153,7 @@ public class MapActivity extends CloudBackendActivity implements
 		super.onResume();
 		setUpMapIfNeeded();
 		TextView overlay = (TextView) findViewById(R.id.overlay);
-		String username = "Not signed in";
+		String username = "";
 		if (super.getAccountName() != null) {
 			username = super.getAccountName();
 		}
