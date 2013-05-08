@@ -1,4 +1,4 @@
-package com.google.cloud.backend.android.sample.geekwatch;
+package com.turbomanage.sample.geekwatch;
 
 import android.view.LayoutInflater;
 import android.view.View;
@@ -6,7 +6,6 @@ import android.widget.TextView;
 
 import com.google.android.gms.maps.GoogleMap.InfoWindowAdapter;
 import com.google.android.gms.maps.model.Marker;
-import com.google.cloud.backend.android.R;
 
 public class CustomInfoWindowAdapter implements InfoWindowAdapter {
 

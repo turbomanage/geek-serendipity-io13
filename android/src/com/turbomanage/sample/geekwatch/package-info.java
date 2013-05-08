@@ -18,4 +18,4 @@
  * @author David M. Chandler
  *
  */
-package com.google.cloud.backend.android.sample.geekwatch;
+package com.turbomanage.sample.geekwatch;

@@ -1,4 +1,4 @@
-package com.google.cloud.backend.android.sample.geekwatch;
+package com.turbomanage.sample.geekwatch;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -11,7 +11,6 @@ import android.os.Handler;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -21,7 +20,6 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.cloud.backend.android.CloudBackendActivity;
 import com.google.cloud.backend.android.CloudCallbackHandler;
@@ -30,8 +28,7 @@ import com.google.cloud.backend.android.CloudQuery;
 import com.google.cloud.backend.android.CloudQuery.Order;
 import com.google.cloud.backend.android.CloudQuery.Scope;
 import com.google.cloud.backend.android.F.Op;
-import com.google.cloud.backend.android.R;
-import com.google.cloud.backend.android.sample.geekwatch.InterestPickerDialog.HasGeekInterest;
+import com.turbomanage.sample.geekwatch.InterestPickerDialog.HasGeekInterest;
 
 public class GeekwatchActivity extends CloudBackendActivity implements
                 OnCameraChangeListener, OnMyLocationChangeListener, HasGeekInterest {
