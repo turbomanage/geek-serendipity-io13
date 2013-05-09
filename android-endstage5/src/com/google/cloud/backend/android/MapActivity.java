@@ -69,11 +69,11 @@ public class MapActivity extends CloudBackendActivity implements
 	private void drawMyMarker() {
 		if (myLocation == null)
 			return;
+		mMap.clear();
 		float markerColor = BitmapDescriptorFactory.HUE_AZURE;
 		mMap.addMarker(new MarkerOptions().position(gh.decode(myLocation))
 				.title("UberGeek").snippet(myLocation)
 				.icon(BitmapDescriptorFactory.defaultMarker(markerColor)));
-
 	}
 
 	private void queryGeeks() {
@@ -100,17 +100,19 @@ public class MapActivity extends CloudBackendActivity implements
 	}
 
 	protected void drawMarkers(List<CloudEntity> results) {
-		mMap.clear();
+	    drawMyMarker();
 		for (CloudEntity geek : results) {
 			float markerColor = BitmapDescriptorFactory.HUE_RED;
 			String locHash = (String) geek.get("location");
+			if (myLocation != null && myLocation.equals(locHash)) {
+			    continue;
+			}
 			mMap.addMarker(new MarkerOptions()
 					.position(gh.decode(locHash))
 					.title("Some Geek")
 					.snippet(myLocation)
 					.icon(BitmapDescriptorFactory.defaultMarker(markerColor)));
 		}
-		drawMyMarker();
 	}
 
 	@Override
