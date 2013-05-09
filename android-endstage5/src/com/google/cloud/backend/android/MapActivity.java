@@ -50,19 +50,17 @@ public class MapActivity extends CloudBackendActivity implements
 	}
 
 	protected String myLocation;
-	protected boolean locSent;
+	protected static boolean locSent;
 	private static final Geohasher gh = new Geohasher();
 
 	private void sendMyLocation() {
 		CloudEntity self = new CloudEntity("Geek");
 		self.put("interest", "Cloud");
 		self.put("location", this.myLocation);
-		// getCloudBackend().update
 		getCloudBackend().update(self, new CloudCallbackHandler<CloudEntity>() {
 			@Override
 			public void onComplete(CloudEntity results) {
 				locSent = true;
-				drawMyMarker();
 			}
 		});
 	}
@@ -102,13 +100,15 @@ public class MapActivity extends CloudBackendActivity implements
 	}
 
 	protected void drawMarkers(List<CloudEntity> results) {
-	    drawMyMarker();
+	    mMap.clear();
 		for (CloudEntity geek : results) {
 			float markerColor = BitmapDescriptorFactory.HUE_RED;
-			String locHash = (String) geek.get("location");
-			if (myLocation != null && myLocation.equals(locHash)) {
-			    continue;
+			String createdBy = geek.getCreatedBy();
+			// mark self in blue
+			if (createdBy != null && createdBy.equals(super.getAccountName())) {
+			    markerColor = BitmapDescriptorFactory.HUE_AZURE;
 			}
+			String locHash = (String) geek.get("location");
 			mMap.addMarker(new MarkerOptions()
 					.position(gh.decode(locHash))
 					.title("Some Geek")

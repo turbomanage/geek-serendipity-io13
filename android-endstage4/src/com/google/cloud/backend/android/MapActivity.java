@@ -1,20 +1,15 @@
 package com.google.cloud.backend.android;
 
-import java.io.IOException;
-import java.util.List;
-
 import android.location.Location;
 import android.os.Bundle;
 import android.view.Menu;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.GoogleMap.OnMyLocationChangeListener;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.cloud.backend.android.CloudQuery.Scope;
 
 public class MapActivity extends CloudBackendActivity implements
 		OnMyLocationChangeListener {
@@ -49,14 +44,13 @@ public class MapActivity extends CloudBackendActivity implements
 	}
 
 	protected String myLocation;
-	protected boolean locSent;
+	protected static boolean locSent;
 	private static final Geohasher gh = new Geohasher();
 
 	private void sendMyLocation() {
 		CloudEntity self = new CloudEntity("Geek");
 		self.put("interest", "Cloud");
 		self.put("location", this.myLocation);
-		// getCloudBackend().update
 		getCloudBackend().update(self, new CloudCallbackHandler<CloudEntity>() {
 			@Override
 			public void onComplete(CloudEntity results) {
