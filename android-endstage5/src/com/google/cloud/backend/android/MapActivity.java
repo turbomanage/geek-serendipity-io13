@@ -14,6 +14,7 @@ import com.google.android.gms.maps.GoogleMap.OnMyLocationChangeListener;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.cloud.backend.android.CloudQuery.Order;
 import com.google.cloud.backend.android.CloudQuery.Scope;
 
 public class MapActivity extends CloudBackendActivity implements
@@ -95,6 +96,7 @@ public class MapActivity extends CloudBackendActivity implements
 
 		CloudQuery cq = new CloudQuery("Geek");
 		cq.setLimit(50);
+        cq.setSort(CloudEntity.PROP_UPDATED_AT, Order.DESC);
 		cq.setScope(Scope.FUTURE_AND_PAST);
 		getCloudBackend().list(cq, handler);
 	}
