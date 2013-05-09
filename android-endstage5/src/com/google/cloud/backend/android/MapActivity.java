@@ -125,6 +125,12 @@ public class MapActivity extends CloudBackendActivity implements
 	}
 
 	@Override
+	protected void onPostCreate() {
+	    super.onPostCreate();
+	    queryGeeks();
+	}
+
+	@Override
 	protected void onResume() {
 		super.onResume();
 		setUpMapIfNeeded();
@@ -134,7 +140,6 @@ public class MapActivity extends CloudBackendActivity implements
 			username = super.getAccountName();
 		}
 		overlay.setText(username);
-		queryGeeks();
 	}
 
 	@Override

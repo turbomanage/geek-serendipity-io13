@@ -32,7 +32,7 @@ import java.util.List;
  * name of the class definition below.
  *
  */
-public class CloudBackendActivity extends Activity {
+public class CloudBackendActivity extends FragmentActivity {
 
   private static final int REQUEST_ACCOUNT_PICKER = 2;
 
